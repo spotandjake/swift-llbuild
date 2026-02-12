@@ -166,9 +166,8 @@ elseif(MSVC)
     "$<$<COMPILE_LANGUAGE:CXX>:-wd4800>" # Forcing value to bool 'true' or 'false'.
     "$<$<COMPILE_LANGUAGE:CXX>:-wd4996>" # POSIX name for this item is deprecated.
     "$<$<COMPILE_LANGUAGE:CXX>:/EHsc>")
-else ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(
-    # Enable additional Clang warnings.
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>"
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wbool-conversion>"
@@ -191,7 +190,20 @@ else ()
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-function>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-value>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-variable>")
-endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(
+    "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wall>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wextra>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wconversion>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wsign-compare>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wswitch>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wuninitialized>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-function>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-value>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-variable>")
+endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   add_compile_definitions("LLVM_ON_WIN32")
