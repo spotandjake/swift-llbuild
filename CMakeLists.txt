@@ -12,6 +12,19 @@ if (CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
+# Optional: use GCC instead of the default compiler (e.g. Homebrew gcc-15).
+# Example: cmake -DUSE_GCC=ON .. or cmake -DCMAKE_CXX_COMPILER=/path/to/g++-15 ..
+# set(LLBUILD_GCC_CXX "/opt/homebrew/Cellar/gcc/15.2.0_1/bin/g++-15" CACHE STRING "Path to g++ when USE_GCC is ON")
+# option(USE_GCC "Use GCC to build (sets CMAKE_CXX_COMPILER to LLBUILD_GCC_CXX)" OFF)
+# if(USE_GCC)
+#   set(CMAKE_CXX_COMPILER "${LLBUILD_GCC_CXX}" CACHE STRING "C++ compiler" FORCE)
+# endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_definitions(_Nonnull=)
+    add_compile_definitions(_Nullable=)
+endif()
+
 project(llbuild LANGUAGES CXX)
 
 option(BUILD_SHARED_LIBS "Build Shared Libraries" ON)
@@ -146,10 +159,10 @@ if (XCODE)
   set(CMAKE_XCODE_ATTRIBUTE_GCC_ENABLE_CPP_RTTI "NO")
 
   # Disable exceptions.
-  set(CMAKE_XCODE_ATTRIBUTE_GCC_ENABLE_CPP_EXCEPTIONS "NO") 
+  set(CMAKE_XCODE_ATTRIBUTE_GCC_ENABLE_CPP_EXCEPTIONS "NO")
 
   # Disable headermaps.
-  set(CMAKE_XCODE_ATTRIBUTE_USE_HEADERMAP "NO") 
+  set(CMAKE_XCODE_ATTRIBUTE_USE_HEADERMAP "NO")
 elseif(MSVC)
   add_compile_options(
     # Disable unknown pragma warnings (e.g. for #pragma mark).
@@ -167,21 +180,14 @@ elseif(MSVC)
     "$<$<COMPILE_LANGUAGE:CXX>:-wd4996>" # POSIX name for this item is deprecated.
     "$<$<COMPILE_LANGUAGE:CXX>:/EHsc>")
 else ()
+  # Flags supported by both Clang and GCC.
   add_compile_options(
-    # Enable additional Clang warnings.
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>"
     "$<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wbool-conversion>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wconstant-conversion>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wdeprecated-declarations>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wdocumentation>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wempty-body>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wenum-conversion>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wimplicit-fallthrough>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wint-conversion>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Winvalid-offsetof>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wmost>"
-    "$<$<COMPILE_LANGUAGE:CXX>:-Wnewline-eof>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wnon-virtual-dtor>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wparentheses>"
@@ -191,6 +197,20 @@ else ()
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-function>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-value>"
     "$<$<COMPILE_LANGUAGE:CXX>:-Wunused-variable>")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wbool-conversion>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wconstant-conversion>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wdocumentation>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wenum-conversion>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wint-conversion>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wmost>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wnewline-eof>")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wextra>"
+      "$<$<COMPILE_LANGUAGE:CXX>:-Wall>")
+  endif()
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

@@ -34,7 +34,7 @@
 /// Set the file time access and modification times to a specified time,
 /// or to the current time.
 static int file_time_set_fixed(const char* filename, struct timespec time_to_set) {
-#if defined __APPLE__
+#if defined __APPLE__ && defined(__clang__)
   if (__builtin_available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)) {
     struct timespec times[2] = { time_to_set, time_to_set };
     return utimensat(AT_FDCWD, filename, times, 0);
@@ -50,6 +50,15 @@ static int file_time_set_fixed(const char* filename, struct timespec time_to_set
     struct timeval times[2] = { tv, tv };
     return utimes(filename, times);
   }
+#elif defined __APPLE__
+  if (time_to_set.tv_nsec == UTIME_NOW) {
+    return utimes(filename, NULL);
+  }
+  struct timeval tv;
+  tv.tv_sec = time_to_set.tv_sec;
+  tv.tv_usec = (__darwin_suseconds_t)(time_to_set.tv_nsec / 1000);
+  struct timeval times[2] = { tv, tv };
+  return utimes(filename, times);
 #elif defined __linux__
   struct timespec times[2] = { time_to_set, time_to_set };
   return utimensat(AT_FDCWD, filename, times, 0);

@@ -42,8 +42,9 @@ struct DBKeyID {
   explicit DBKeyID(uint64_t value) : value(value) { ; }
 };
 
-// Provide DenseMapInfo for DBKeyID.
-template<> struct ::llvm::DenseMapInfo<DBKeyID> {
+// Provide DenseMapInfo for DBKeyID
+namespace llvm {
+template<> struct DenseMapInfo<DBKeyID> {
   static inline DBKeyID getEmptyKey() { return DBKeyID(~0ULL); }
   static inline DBKeyID getTombstoneKey() { return DBKeyID(~0ULL - 1ULL); }
   static unsigned getHashValue(const DBKeyID& Val) {
@@ -53,6 +54,7 @@ template<> struct ::llvm::DenseMapInfo<DBKeyID> {
     return LHS.value == RHS.value;
   }
 };
+}
 
 // Helper macro checking and returning error messages for failed SQLite calls
 #define checkSQLiteResultOKReturnFalse(result) \

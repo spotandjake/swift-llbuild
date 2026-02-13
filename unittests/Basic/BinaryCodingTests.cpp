@@ -28,6 +28,8 @@ inline bool operator==(CustomType lhs, CustomType rhs) {
   return lhs.a == rhs.a && lhs.b == rhs.b;
 }
 
+namespace llbuild {
+namespace basic {
 template<>
 struct BinaryCodingTraits<CustomType> {
   static inline void encode(const CustomType& value,
@@ -40,6 +42,8 @@ struct BinaryCodingTraits<CustomType> {
     coder.read(value.b);
   }
 };
+}
+}
 
 namespace {
 

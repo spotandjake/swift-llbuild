@@ -19,7 +19,7 @@
 #include <atomic>
 
 // os_signpost is included in mac OS 10.14, if that header is not available, we don't trace at all.
-#if __has_include(<os/signpost.h>)
+#if __has_include(<os/signpost.h>) && defined(__clang__)
 #include <os/signpost.h>
 #include <dispatch/dispatch.h>
 
