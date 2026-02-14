@@ -51,6 +51,14 @@
 #include "TargetConditionals.h"
 #endif
 
+#if defined(__clang__)
+#  define LLBUILD_NONNULL _Nonnull
+#  define LLBUILD_NULLABLE _Nullable
+#else
+#  define LLBUILD_NONNULL
+#  define LLBUILD_NULLABLE
+#endif
+
 #ifndef __GLIBC_PREREQ
 #define __GLIBC_PREREQ(maj, min) 0
 #endif
@@ -92,18 +100,19 @@ static int _subprocess_block_everything_but_something_went_seriously_wrong_signa
 }
 
 static int _subprocess_fork_exec(
-  pid_t * _Nonnull pid,
-  const char * _Nonnull exec_path,
-  const char * _Nullable working_directory,
-  const int file_descriptors[_Nonnull],
-  char * _Nullable const args[_Nonnull],
-  char * _Nullable const env[_Nullable],
-  uid_t * _Nullable uid,
-  gid_t * _Nullable gid,
-  gid_t * _Nullable process_group_id,
-  int number_of_sgroups, const gid_t * _Nullable sgroups,
+  pid_t * LLBUILD_NONNULL pid,
+  const char * LLBUILD_NONNULL exec_path,
+  const char * LLBUILD_NULLABLE working_directory,
+  const int * LLBUILD_NONNULL file_descriptors, // -> const int file_descriptors[LLBUILD_NONNULL], 
+  char * LLBUILD_NULLABLE const * LLBUILD_NONNULL args, // -> char * LLBUILD_NULLABLE const args[LLBUILD_NONNULL],
+  char * LLBUILD_NULLABLE const * LLBUILD_NULLABLE env, // -> char * LLBUILD_NULLABLE const env[LLBUILD_NULLABLE],
+  uid_t * LLBUILD_NULLABLE uid,
+  gid_t * LLBUILD_NULLABLE gid,
+  gid_t * LLBUILD_NULLABLE process_group_id,
+  int number_of_sgroups,
+  const gid_t * LLBUILD_NULLABLE sgroups,
   int create_session,
-  void (* _Nullable configurator)(void)
+  void (* LLBUILD_NULLABLE configurator)(void)
 ) {
 #define write_error_and_exit int error = errno; \
 write(pipefd[1], &error, sizeof(error));\

@@ -21,8 +21,8 @@ endif()
 # endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_definitions(_Nonnull=)
-    add_compile_definitions(_Nullable=)
+  add_compile_definitions(_Nonnull=)
+  add_compile_definitions(_Nullable=)
 endif()
 
 project(llbuild LANGUAGES CXX)
